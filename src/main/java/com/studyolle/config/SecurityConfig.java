@@ -1,5 +1,6 @@
 package com.studyolle.config;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,6 +18,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/", "/login", "/sign-up", "/check-email-token",
                                 "/email-login", "/login-by-email", "/search/study").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/profile/*").permitAll()
