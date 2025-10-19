@@ -1,14 +1,36 @@
 package com.studyolle.account;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
+@RequiredArgsConstructor
 public class AccountController {
+
+    private final SignUpFormValidator signUpFormValidator;
+
+    /**
+     * signUpForm 흐름
+     * 사용자가 /sign-up 폼 제출
+     * Spring이 SignUpForm 생성 + 요청 파라미터 바인딩
+     * @InitBinder("signUpForm") 실행 → SignUpFormValidator 연결
+     *
+     * @Valid가 붙어 있으므로
+     * Bean Validation (@NotBlank, @Email, etc.)
+     * Custom Validator (SignUpFormValidator)
+     * 오류는 Errors 객체에 저장, 뷰로 전달
+     */
+    @InitBinder("signUpForm") //@Valid의 signUpForm 과 매핑된다.
+    public void initBinder(WebDataBinder webDataBinder){
+        webDataBinder.addValidators(signUpFormValidator);
+    }
 
     @GetMapping("/sign-up")
     public String signUpForm(Model model){
@@ -19,8 +41,14 @@ public class AccountController {
 
     @PostMapping("sign-up")
     public String signUpSubmit(@Valid SignUpForm signUpForm, Errors errors){
+        //signUpForm은 요청파라미터 -> 객체 바인딩되고,
+        //@Valid로 검증, 결과는 Errors에 담긴다.
+        //컨트롤러 메서드가 리턴되기전 , 스프링은 signUpForm 객체와 BindingResult를 모델에 자동으로 담아 뷰에 전달한다.
         if(errors.hasErrors()){
             return "account/sign-up";
         }
+
+        // TODO 회원 가입 처리
+        return "redirect:/";
     }
 }
