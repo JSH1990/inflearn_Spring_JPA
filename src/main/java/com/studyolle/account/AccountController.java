@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class AccountController {
 
     private final SignUpFormValidator signUpFormValidator;
-    private final JavaMailSender javaMailSender;
+    private final AccountService accountService;
 
     /**
      * signUpForm 흐름
@@ -52,13 +52,7 @@ public class AccountController {
             return "account/sign-up";
         }
 
-
-        Account newAccount = saveNewAccount(signUpForm);
-
-        newAccount.generateEmailCheckToken();
-        sengSignUpConfirmEmail(newAccount);
-
-        // TODO 회원 가입 처리
+        accountService.processNewAccount(signUpForm);
         return "redirect:/";
     }
 
