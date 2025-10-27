@@ -8,33 +8,35 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
-
 @Configuration
-@EnableWebSecurity //시큐리티 커스텀 설정
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // 필요 시 disable
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/", "/login", "/sign-up", "/check-email-token",
-                                "/email-login", "/login-by-email", "/search/study").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/profile/*").permitAll()
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/", "/sign-up", "/check-email", "/check-email-token",
+                                "/email-login", "/check-email-login", "/login-link").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/profile/*").permitAll()
                         .anyRequest().authenticated()
-//                )
-//                .formLogin(form -> form
-//                        .loginPage("login")
-//                        .defaultSuccessUrl("/", true)
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .logoutUrl("/logout")
-//                        .logoutSuccessUrl("/login")
-//                        .permitAll()
+                )
+                // ✅ 기본 로그인 페이지 활성화 (Spring Security 제공)
+                .formLogin(form -> form
+                        .loginPage("/")
+                        .loginProcessingUrl("/")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()  // 누구나 접근 가능
+                )
+                // ✅ 기본 로그아웃 처리 (Security가 자동으로 제공)
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/")  // 로그아웃 후 이동 경로
+                        .permitAll()
                 );
+
         return http.build();
     }
-
 }
