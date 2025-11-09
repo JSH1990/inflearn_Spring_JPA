@@ -5,7 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -19,16 +21,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // 필요 시 disable
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/", "/sign-up", "/check-email", "/check-email-token",
+                        .requestMatchers("/", "/login", "/sign-up", "/check-email-token",
                                 "/email-login", "/check-email-login", "/login-link").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profile/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 // ✅ 기본 로그인 페이지 활성화 (Spring Security 제공)
                 .formLogin(form -> form
-                        .loginPage("/")
-                        .loginProcessingUrl("/")
-                        .defaultSuccessUrl("/", true)
+                        .loginPage("/login")
                         .permitAll()  // 누구나 접근 가능
                 )
                 // ✅ 기본 로그아웃 처리 (Security가 자동으로 제공)
@@ -39,4 +39,13 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                .requestMatchers("/node_modules/**")
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    }
+
+
 }
