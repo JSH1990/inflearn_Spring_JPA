@@ -31,6 +31,7 @@ public class AccountService implements UserDetailsService {
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
 
+    //회원 가입후 토큰 생성 및 이메일 발송
     @Transactional
     public Account processNewAccount(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
@@ -39,6 +40,7 @@ public class AccountService implements UserDetailsService {
         return newAccount;
     }
 
+    //회원 가입
     private Account saveNewAccount(@Valid SignUpForm signUpForm) {
         Account account = Account.builder()
                 .email(signUpForm.getEmail())
@@ -51,6 +53,7 @@ public class AccountService implements UserDetailsService {
         return accountRepository.save(account);
     }
 
+    //회원가입 인증 이메일 발송
     public void sendSignUpConfirmEmail(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail());

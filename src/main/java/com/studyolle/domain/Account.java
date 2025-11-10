@@ -52,6 +52,7 @@ public class Account {
     private boolean studyUpdateByWeb;
     private LocalDateTime emailCheckTokenGeneratedAt;
 
+    //회원 가입시 토큰생성
     public void generateEmailCheckToken() {
         this.emailCheckToken = UUID.randomUUID().toString();
     }

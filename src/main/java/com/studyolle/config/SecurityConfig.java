@@ -29,6 +29,7 @@ public class SecurityConfig {
                 // ✅ 기본 로그인 페이지 활성화 (Spring Security 제공)
                 .formLogin(form -> form
                         .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
                         .permitAll()  // 누구나 접근 가능
                 )
                 // ✅ 기본 로그아웃 처리 (Security가 자동으로 제공)
