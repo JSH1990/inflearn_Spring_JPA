@@ -24,6 +24,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class AccountService implements UserDetailsService {
 
@@ -32,7 +33,6 @@ public class AccountService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     //회원 가입후 토큰 생성 및 이메일 발송
-    @Transactional
     public Account processNewAccount(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
         newAccount.generateEmailCheckToken();
@@ -68,7 +68,7 @@ public class AccountService implements UserDetailsService {
     public void login(Account account) {
         // 1️⃣ Authentication 객체 생성
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                new UserAccount(account),
+                new UserAccount(account), //현재 로그인한 유저의 정보
                 account.getPassword(),        // Credentials (비밀번호)
                 List.of(new SimpleGrantedAuthority("ROLE_USER")) // 권한
         );
@@ -87,6 +87,23 @@ public class AccountService implements UserDetailsService {
         session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
+    /*
+    사용자 → 로그인 폼 제출 (username, password)
+                ↓
+    Spring Security 필터가 요청 가로챔
+                ↓
+    UserDetailsService.loadUserByUsername(username) 호출
+                ↓
+    Account 조회 (DB)
+                ↓
+    UserAccount(UserDetails) 생성해서 반환
+                ↓
+    스프링 시큐리티가 비밀번호 비교
+                ↓
+    인증 성공 → SecurityContext에 저장 → 로그인 완료
+     */
+
+    @Transactional(readOnly = true)
     @Override
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
@@ -99,5 +116,10 @@ public class AccountService implements UserDetailsService {
         }
 
         return new UserAccount(account);
+    }
+
+    public void completeSignUp(Account account){
+        account.completeSignUp();
+        login(account);
     }
 }
