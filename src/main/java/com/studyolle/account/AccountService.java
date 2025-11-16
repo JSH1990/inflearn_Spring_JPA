@@ -129,6 +129,7 @@ public class AccountService implements UserDetailsService {
         account.setOccupation(profile.getOccupation());
         account.setLocation(profile.getLocation());
         account.setBio(profile.getBio());
-        accountRepository.save(account);
+        accountRepository.save(account); //@CurrentUser로 받은 Account 객체는 스프링 시큐리티에 보관된 detached 상태 객체라서,
+        //값만 바꿔서는 DB에 반영되지 않으며, save()를 반드시 호출해야 한다.
     }
 }
