@@ -1,11 +1,13 @@
 package com.studyolle.account;
 
 import com.studyolle.domain.Account;
+import com.studyolle.settings.Notifications;
 import com.studyolle.settings.Profile;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +34,7 @@ public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final JavaMailSender javaMailSender;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
     //회원 가입후 토큰 생성 및 이메일 발송
     public Account processNewAccount(SignUpForm signUpForm) {
@@ -49,7 +52,7 @@ public class AccountService implements UserDetailsService {
                 .password(passwordEncoder.encode(signUpForm.getPassword()))
                 .studyCreatedByWeb(true)
                 .studyEnrollmentResultByWeb(true)
-                .studyUpdateByWeb(true)
+                .studyUpdatedByWeb(true)
                 .build();
         return accountRepository.save(account);
     }
@@ -108,28 +111,24 @@ public class AccountService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String emailOrNickname) throws UsernameNotFoundException {
         Account account = accountRepository.findByEmail(emailOrNickname);
-        if(account == null){
-           account = accountRepository.findByNickname(emailOrNickname);
+        if (account == null) {
+            account = accountRepository.findByNickname(emailOrNickname);
         }
 
-        if(account == null){
+        if (account == null) {
             throw new UsernameNotFoundException(emailOrNickname);
         }
 
         return new UserAccount(account);
     }
 
-    public void completeSignUp(Account account){
+    public void completeSignUp(Account account) {
         account.completeSignUp();
         login(account);
     }
 
     public void updateProfile(Account account, Profile profile) {
-        account.setUrl(profile.getUrl());
-        account.setOccupation(profile.getOccupation());
-        account.setLocation(profile.getLocation());
-        account.setBio(profile.getBio());
-        account.setProfileImage(profile.getProfileImage());
+        modelMapper.map(profile, account);
         accountRepository.save(account); //@CurrentUser로 받은 Account 객체는 스프링 시큐리티에 보관된 detached 상태 객체라서,
         //값만 바꿔서는 DB에 반영되지 않으며, save()를 반드시 호출해야 한다.
     }
@@ -137,5 +136,10 @@ public class AccountService implements UserDetailsService {
     public void updatePassword(Account account, String newPassword) {
         account.setPassword(passwordEncoder.encode(newPassword));
         accountRepository.save(account); //merge
+    }
+
+    public void updateNotifications(Account account, Notifications notifications) {
+        modelMapper.map(notifications, account);
+        accountRepository.save(account);
     }
 }
