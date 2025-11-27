@@ -32,7 +32,6 @@ public class SecurityConfig {
         http
 //                .csrf(csrf -> csrf.ignoringRequestMatchers(PathRequest.toH2Console()))
 //                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-                .csrf(csrf -> csrf.disable()) // 필요 시 disable
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/", "/login", "/sign-up", "/check-email-token",
