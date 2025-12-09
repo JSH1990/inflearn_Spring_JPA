@@ -1,10 +1,9 @@
 package com.studyolle.account;
 
+import com.studyolle.account.form.SignUpForm;
+import com.studyolle.account.validator.SignUpFormValidator;
 import com.studyolle.domain.Account;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -13,8 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDateTime;
+import javax.validation.Valid;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,35 +24,20 @@ public class AccountController {
     private final AccountService accountService;
     private final AccountRepository accountRepository;
 
-    /**
-     * signUpForm 흐름
-     * 사용자가 /sign-up 폼 제출
-     * Spring이 SignUpForm 생성 + 요청 파라미터 바인딩
-     * @InitBinder("signUpForm") 실행 → SignUpFormValidator 연결
-     *
-     * @Valid가 붙어 있으므로
-     * Bean Validation (@NotBlank, @Email, etc.)
-     * Custom Validator (SignUpFormValidator)
-     * 오류는 Errors 객체에 저장, 뷰로 전달
-     */
-    @InitBinder("signUpForm") //@Valid의 signUpForm 과 매핑된다.
-    public void initBinder(WebDataBinder webDataBinder){
+    @InitBinder("signUpForm")
+    public void initBinder(WebDataBinder webDataBinder) {
         webDataBinder.addValidators(signUpFormValidator);
     }
 
     @GetMapping("/sign-up")
-    public String signUpForm(Model model){
-//        model.addAttribute("signUpForm", new SignUpForm()); //"signUpForm" 없어도 이름 같으면 만들어줌
+    public String signUpForm(Model model) {
         model.addAttribute(new SignUpForm());
         return "account/sign-up";
     }
 
     @PostMapping("/sign-up")
-    public String signUpSubmit(@Valid SignUpForm signUpForm, Errors errors){
-        //signUpForm은 요청파라미터 -> 객체 바인딩되고,
-        //@Valid로 검증, 결과는 Errors에 담긴다.
-        //컨트롤러 메서드가 리턴되기전 , 스프링은 signUpForm 객체와 BindingResult를 모델에 자동으로 담아 뷰에 전달한다.
-        if(errors.hasErrors()){
+    public String signUpSubmit(@Valid SignUpForm signUpForm, Errors errors) {
+        if (errors.hasErrors()) {
             return "account/sign-up";
         }
 
@@ -61,36 +46,16 @@ public class AccountController {
         return "redirect:/";
     }
 
-    @GetMapping("/check-email")
-    public String checkEmail(@CurrentUser Account account, Model model){
-        model.addAttribute("email", account.getEmail());
-        return "account/check-email";
-    }
-
-    @GetMapping("/resend-confirm-email")
-    public String resendConfirmEmail(@CurrentUser Account account, Model model) {
-        if (!account.canSendConfirmEmail()) {
-            model.addAttribute("error", "인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
-            model.addAttribute(account);
-            return "account/check-email";
-        }
-
-        accountService.sendSignUpConfirmEmail(account);
-        return "redirect:/";
-    }
-
-
     @GetMapping("/check-email-token")
-    public String checkEmailToken(String token, String email, Model model){
+    public String checkEmailToken(String token, String email, Model model) {
         Account account = accountRepository.findByEmail(email);
         String view = "account/checked-email";
-
-        if(account == null){
+        if (account == null) {
             model.addAttribute("error", "wrong.email");
             return view;
         }
 
-        if(!account.isValidToken(token)){
+        if (!account.isValidToken(token)) {
             model.addAttribute("error", "wrong.token");
             return view;
         }
@@ -101,8 +66,26 @@ public class AccountController {
         return view;
     }
 
+    @GetMapping("/check-email")
+    public String checkEmail(@CurrentAccount Account account, Model model) {
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
+    }
+
+    @GetMapping("/resend-confirm-email")
+    public String resendConfirmEmail(@CurrentAccount Account account, Model model) {
+        if (!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "인증 이메일은 1시간에 한번만 전송할 수 있습니다.");
+            model.addAttribute("email", account.getEmail());
+            return "account/check-email";
+        }
+
+        accountService.sendSignUpConfirmEmail(account);
+        return "redirect:/";
+    }
+
     @GetMapping("/profile/{nickname}")
-    public String viewProfile(@PathVariable String nickname, Model model, @CurrentUser Account account) {
+    public String viewProfile(@PathVariable String nickname, Model model, @CurrentAccount Account account) {
         Account byNickname = accountRepository.findByNickname(nickname);
         if (nickname == null) {
             throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
@@ -113,6 +96,40 @@ public class AccountController {
         return "account/profile";
     }
 
+    @GetMapping("/email-login")
+    public String emailLoginForm() {
+        return "account/email-login";
+    }
 
+    @PostMapping("/email-login")
+    public String sendEmailLoginLink(String email, Model model, RedirectAttributes attributes) {
+        Account account = accountRepository.findByEmail(email);
+        if (account == null) {
+            model.addAttribute("error", "유효한 이메일 주소가 아닙니다.");
+            return "account/email-login";
+        }
+
+        if (!account.canSendConfirmEmail()) {
+            model.addAttribute("error", "이메일 로그인은 1시간 뒤에 사용할 수 있습니다.");
+            return "account/email-login";
+        }
+
+        accountService.sendLoginLink(account);
+        attributes.addFlashAttribute("message", "이메일 인증 메일을 발송했습니다.");
+        return "redirect:/email-login";
+    }
+
+    @GetMapping("/login-by-email")
+    public String loginByEmail(String token, String email, Model model) {
+        Account account = accountRepository.findByEmail(email);
+        String view = "account/logged-in-by-email";
+        if (account == null || !account.isValidToken(token)) {
+            model.addAttribute("error", "로그인할 수 없습니다.");
+            return view;
+        }
+
+        accountService.login(account);
+        return view;
+    }
 
 }
