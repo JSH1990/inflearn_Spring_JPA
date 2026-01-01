@@ -6,6 +6,7 @@ import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.mail.SimpleMailMessage;
@@ -20,7 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

@@ -3,6 +3,7 @@ package com.studyolle.account;
 import com.studyolle.account.form.SignUpForm;
 import com.studyolle.account.validator.SignUpFormValidator;
 import com.studyolle.domain.Account;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.validation.Valid;
 
 @Controller
 @RequiredArgsConstructor
