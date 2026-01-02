@@ -6,6 +6,8 @@ import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -13,13 +15,17 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,10 +65,23 @@ public class AccountService implements UserDetailsService {
 
     public void login(Account account) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-                new UserAccount(account),
-                account.getPassword(),
-                List.of(new SimpleGrantedAuthority("ROLE_USER")));
-        SecurityContextHolder.getContext().setAuthentication(token);
+                new UserAccount(account), //현재 로그인한 유저의 정보
+                account.getPassword(),        // Credentials (비밀번호)
+                List.of(new SimpleGrantedAuthority("ROLE_USER")) // 권한
+        );
+
+        // 2️⃣ SecurityContext 생성 후 인증객체 등록
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(token);
+        SecurityContextHolder.setContext(context);
+
+        // 3️⃣ 현재 요청 가져오기
+        HttpServletRequest request =
+                ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
+        // 4️⃣ 세션에 SecurityContext 저장 (redirect 후에도 인증 유지됨)
+        HttpSession session = request.getSession(true);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
     @Transactional(readOnly = true)
