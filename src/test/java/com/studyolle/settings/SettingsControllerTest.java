@@ -8,6 +8,7 @@ import com.studyolle.domain.Account;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
 import com.studyolle.settings.form.TagForm;
+import com.studyolle.settings.form.ZoneForm;
 import com.studyolle.tag.TagRepository;
 import com.studyolle.zone.ZoneRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -55,54 +56,54 @@ class SettingsControllerTest {
         zoneRepository.deleteAll();
     }
 
-//    @WithAccount("keesun")
-//    @DisplayName("계정의 지역 정보 수정 폼")
-//    @Test
-//    void updateZonesForm() throws Exception {
-//        mockMvc.perform(get(ROOT + SETTINGS + ZONES))
-//                .andExpect(view().name(SETTINGS + ZONES))
-//                .andExpect(model().attributeExists("account"))
-//                .andExpect(model().attributeExists("whitelist"))
-//                .andExpect(model().attributeExists("zones"));
-//    }
-//
-//    @WithAccount("keesun")
-//    @DisplayName("계정의 지역 정보 추가")
-//    @Test
-//    void addZone() throws Exception {
-//        ZoneForm zoneForm = new ZoneForm();
-//        zoneForm.setZoneName(testZone.toString());
-//
-//        mockMvc.perform(post(ROOT + SETTINGS + ZONES + "/add")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(zoneForm))
-//                .with(csrf()))
-//                .andExpect(status().isOk());
-//
-//        Account keesun = accountRepository.findByNickname("keesun");
-//        Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
-//        assertTrue(keesun.getZones().contains(zone));
-//    }
-//
-//    @WithAccount("keesun")
-//    @DisplayName("계정의 지역 정보 추가")
-//    @Test
-//    void removeZone() throws Exception {
-//        Account keesun = accountRepository.findByNickname("keesun");
-//        Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
-//        accountService.addZone(keesun, zone);
-//
-//        ZoneForm zoneForm = new ZoneForm();
-//        zoneForm.setZoneName(testZone.toString());
-//
-//        mockMvc.perform(post(ROOT + SETTINGS + ZONES + "/remove")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(zoneForm))
-//                .with(csrf()))
-//                .andExpect(status().isOk());
-//
-//        assertFalse(keesun.getZones().contains(zone));
-//    }
+    @WithAccount("keesun")
+    @DisplayName("계정의 지역 정보 수정 폼")
+    @Test
+    void updateZonesForm() throws Exception {
+        mockMvc.perform(get(ROOT + SETTINGS + ZONES))
+                .andExpect(view().name(SETTINGS + ZONES))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(model().attributeExists("zones"));
+    }
+
+    @WithAccount("keesun")
+    @DisplayName("계정의 지역 정보 추가")
+    @Test
+    void addZone() throws Exception {
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName(testZone.toString());
+
+        mockMvc.perform(post(ROOT + SETTINGS + ZONES + "/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(zoneForm))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        Account keesun = accountRepository.findByNickname("keesun");
+        Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
+        assertTrue(keesun.getZones().contains(zone));
+    }
+
+    @WithAccount("keesun")
+    @DisplayName("계정의 지역 정보 추가")
+    @Test
+    void removeZone() throws Exception {
+        Account keesun = accountRepository.findByNickname("keesun");
+        Zone zone = zoneRepository.findByCityAndProvince(testZone.getCity(), testZone.getProvince());
+        accountService.addZone(keesun, zone);
+
+        ZoneForm zoneForm = new ZoneForm();
+        zoneForm.setZoneName(testZone.toString());
+
+        mockMvc.perform(post(ROOT + SETTINGS + ZONES + "/remove")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(zoneForm))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        assertFalse(keesun.getZones().contains(zone));
+    }
 
     @WithAccount("keesun")
     @DisplayName("계정의 태그 수정 폼")
@@ -123,9 +124,9 @@ class SettingsControllerTest {
         tagForm.setTagTitle("newTag");
 
         mockMvc.perform(post(ROOT + SETTINGS + TAGS + "/add")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(tagForm))
-                .with(csrf()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagForm))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         Tag newTag = tagRepository.findByTitle("newTag");
@@ -148,9 +149,9 @@ class SettingsControllerTest {
         tagForm.setTagTitle("newTag");
 
         mockMvc.perform(post(ROOT + SETTINGS + TAGS + "/remove")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(tagForm))
-                .with(csrf()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagForm))
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         assertFalse(keesun.getTags().contains(newTag));
@@ -172,8 +173,8 @@ class SettingsControllerTest {
     void updateAccount_success() throws Exception {
         String newNickname = "whiteship";
         mockMvc.perform(post(ROOT + SETTINGS + ACCOUNT)
-                .param("nickname", newNickname)
-                .with(csrf()))
+                        .param("nickname", newNickname)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(ROOT + SETTINGS + ACCOUNT))
                 .andExpect(flash().attributeExists("message"));
@@ -187,8 +188,8 @@ class SettingsControllerTest {
     void updateAccount_failure() throws Exception {
         String newNickname = "¯\\_(ツ)_/¯";
         mockMvc.perform(post(ROOT + SETTINGS + ACCOUNT)
-                .param("nickname", newNickname)
-                .with(csrf()))
+                        .param("nickname", newNickname)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name(SETTINGS + ACCOUNT))
                 .andExpect(model().hasErrors())
@@ -212,8 +213,8 @@ class SettingsControllerTest {
     void updateProfile() throws Exception {
         String bio = "짧은 소개를 수정하는 경우.";
         mockMvc.perform(post(ROOT + SETTINGS + PROFILE)
-                .param("bio", bio)
-                .with(csrf()))
+                        .param("bio", bio)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(ROOT + SETTINGS + PROFILE))
                 .andExpect(flash().attributeExists("message"));
@@ -228,8 +229,8 @@ class SettingsControllerTest {
     void updateProfile_error() throws Exception {
         String bio = "길게 소개를 수정하는 경우. 길게 소개를 수정하는 경우. 길게 소개를 수정하는 경우. 너무나도 길게 소개를 수정하는 경우. ";
         mockMvc.perform(post(ROOT + SETTINGS + PROFILE)
-                .param("bio", bio)
-                .with(csrf()))
+                        .param("bio", bio)
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name(SETTINGS + PROFILE))
                 .andExpect(model().attributeExists("account"))
@@ -255,9 +256,9 @@ class SettingsControllerTest {
     @Test
     void updatePassword_success() throws Exception {
         mockMvc.perform(post(ROOT + SETTINGS + PASSWORD)
-                .param("newPassword", "12345678")
-                .param("newPasswordConfirm", "12345678")
-                .with(csrf()))
+                        .param("newPassword", "12345678")
+                        .param("newPasswordConfirm", "12345678")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(ROOT + SETTINGS + PASSWORD))
                 .andExpect(flash().attributeExists("message"));
@@ -271,9 +272,9 @@ class SettingsControllerTest {
     @Test
     void updatePassword_fail() throws Exception {
         mockMvc.perform(post(ROOT + SETTINGS + PASSWORD)
-                .param("newPassword", "12345678")
-                .param("newPasswordConfirm", "11111111")
-                .with(csrf()))
+                        .param("newPassword", "12345678")
+                        .param("newPasswordConfirm", "11111111")
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(view().name(SETTINGS + PASSWORD))
                 .andExpect(model().hasErrors())
