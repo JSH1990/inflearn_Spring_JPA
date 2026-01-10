@@ -1,9 +1,12 @@
 package com.studyolle.account;
 
 import com.studyolle.account.form.SignUpForm;
+import com.studyolle.config.AppProperties;
 import com.studyolle.domain.Account;
 import com.studyolle.domain.Tag;
 import com.studyolle.domain.Zone;
+import com.studyolle.mail.EmailMessage;
+import com.studyolle.mail.EmailService;
 import com.studyolle.settings.form.Notifications;
 import com.studyolle.settings.form.Profile;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,9 +42,11 @@ import java.util.Set;
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
-    private final JavaMailSender javaMailSender;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final TemplateEngine templateEngine;
+    private final AppProperties appProperties;
 
     public Account processNewAccount(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
@@ -55,12 +62,21 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendSignUpConfirmEmail(Account newAccount) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("스터디올래, 회원 가입 인증");
-        mailMessage.setText("/check-email-token?token=" + newAccount.getEmailCheckToken() +
+        Context context = new Context();
+        context.setVariable("link", "/check-email-token?token=" + newAccount.getEmailCheckToken() +
                 "&email=" + newAccount.getEmail());
-        javaMailSender.send(mailMessage);
+        context.setVariable("nickname", newAccount.getNickname());
+        context.setVariable("linkName", "이메일 인증하기");
+        context.setVariable("message", "스터디올래 서비스를 사용하려면 링크를 클릭하세요.");
+        context.setVariable("host", appProperties.getHost());
+        String message = templateEngine.process("mail/simple-link", context);
+
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(newAccount.getEmail())
+                .subject("스터디올래, 회원 가입 인증")
+                .message(message)
+                .build();
+        emailService.sendEmail(emailMessage);
     }
 
     public void login(Account account) {
@@ -126,13 +142,21 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendLoginLink(Account account) {
-        account.generateEmailCheckToken();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(account.getEmail());
-        mailMessage.setSubject("스터디올래, 로그인 링크");
-        mailMessage.setText("/login-by-email?token=" + account.getEmailCheckToken() +
+        Context context = new Context();
+        context.setVariable("link", "/login-by-email?token=" + account.getEmailCheckToken() +
                 "&email=" + account.getEmail());
-        javaMailSender.send(mailMessage);
+        context.setVariable("nickname", account.getNickname());
+        context.setVariable("linkName", "스터디올래 로그인하기");
+        context.setVariable("message", "로그인 하려면 아래 링크를 클릭하세요.");
+        context.setVariable("host", appProperties.getHost());
+        String message = templateEngine.process("mail/simple-link", context);
+
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("스터디올래, 로그인 링크")
+                .message(message)
+                .build();
+        emailService.sendEmail(emailMessage);
     }
 
     public void addTag(Account account, Tag tag) {
