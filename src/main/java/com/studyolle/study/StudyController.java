@@ -31,11 +31,11 @@ public class StudyController {
 
     @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder) {
-        webDataBinder.addValidators(studyFormValidator);`
+        webDataBinder.addValidators(studyFormValidator);
     }
 
     @GetMapping("/study/{path}")
-    public String study(@CurrentAccount Account account, @PathVariable String path, Model model) {
+    public String viewStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
         model.addAttribute(account);
         model.addAttribute(studyRepository.findByPath(path));
         return "study/view";

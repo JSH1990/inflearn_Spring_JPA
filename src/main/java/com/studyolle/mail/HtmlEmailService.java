@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class HtmlEmailService implements EmailService {
 
-    private final JavaMailSender mailSender;
     private final JavaMailSender javaMailSender;
 
     @Override
