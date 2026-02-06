@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -24,10 +23,10 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class StudyController {
 
+    private final StudyRepository studyRepository;
     private final StudyService studyService;
     private final ModelMapper modelMapper;
     private final StudyFormValidator studyFormValidator;
-    private final StudyRepository studyRepository;
 
     @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder) {
@@ -52,7 +51,6 @@ public class StudyController {
         return "redirect:/study/" + URLEncoder.encode(newStudy.getPath(), StandardCharsets.UTF_8);
     }
 
-    //@PathVariable 애노테이션은 URL 경로(path)에 포함된 값을 컨트롤러 메서드의 파라미터로 바인딩할 때 사용
     @GetMapping("/study/{path}")
     public String viewStudy(@CurrentAccount Account account, @PathVariable String path, Model model) {
         Study study = studyService.getStudy(path);
