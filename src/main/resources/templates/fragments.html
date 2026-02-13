@@ -53,6 +53,10 @@
         .popover {
             font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
         }
+
+        table th {
+            font-weight: lighter;
+        }
     </style>
 </head>
 
@@ -445,6 +449,36 @@
             // re-place Tagify's input element outside of the  element (tagify.DOM.scope), just before it
             tagify.DOM.scope.parentNode.insertBefore(tagify.DOM.input, tagify.DOM.scope);
         });
+    </script>
+</div>
+
+<div th:fragment="date-time">
+    <script src="/node_modules/moment/min/moment-with-locales.min.js"></script>
+    <script type="application/javascript">
+        $(function () {
+            moment.locale('ko');
+            $(".date-time").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LLL');
+            });
+            $(".date").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LL');
+            });
+            $(".weekday").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('dddd');
+            });
+            $(".time").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LT');
+            });
+            $(".calendar").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").calendar();
+            });
+            $(".fromNow").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").fromNow();
+            });
+            $(".date-weekday-time").text(function(index, dateTime) {
+                return moment(dateTime, "YYYY-MM-DD`T`hh:mm").format('LLLL');
+            });
+        })
     </script>
 </div>
 
