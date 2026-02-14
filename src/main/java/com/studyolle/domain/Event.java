@@ -9,6 +9,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@NamedEntityGraph(
+        name = "Event.withEnrollments",
+        attributeNodes = @NamedAttributeNode("enrollments")
+)
+
 @Entity
 @Getter @Setter @EqualsAndHashCode(of = "id")
 public class Event {
@@ -82,6 +87,10 @@ public class Event {
             }
         }
         return false;
+    }
+
+    public long getNumberOfAcceptedEnrollments() {
+        return this.enrollments.stream().filter(Enrollment::isAccepted).count();
     }
 
 }
