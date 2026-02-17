@@ -6,7 +6,7 @@ import com.studyolle.domain.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
-    boolean existByEventAndAccount(Event event, Account account);
+    boolean existsByEventAndAccount(Event event, Account account);
 
     Enrollment findByEventAndAccount(Event event, Account account);
 }

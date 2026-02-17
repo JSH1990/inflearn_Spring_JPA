@@ -39,7 +39,7 @@ public class EventService {
     }
 
     public void newEnrollment(Event event, Account account) {
-        if(!enrollmentRepository.existByEventAndAccount(event, account)){
+        if(!enrollmentRepository.existsByEventAndAccount(event, account)){
             Enrollment enrollment = new Enrollment();
             enrollment.setEnrolledAt(LocalDateTime.now());
             enrollment.setAccepted(event.isAbleToAcceptWaitingEnrollment());
@@ -53,5 +53,21 @@ public class EventService {
         event.removeEnrollment(enrollment);
         enrollmentRepository.delete(enrollment);
         event.acceptNextWaitingEnrollment();
+    }
+
+    public void acceptEnrollment(Event event, Enrollment enrollment) {
+        event.accept(enrollment);
+    }
+
+    public void rejectEnrollment(Event event, Enrollment enrollment) {
+        event.reject(enrollment);
+    }
+
+    public void checkInEnrollment(Enrollment enrollment) {
+        enrollment.setAttended(true);
+    }
+
+    public void cancelCheckInEnrollment(Enrollment enrollment) {
+        enrollment.setAttended(false);
     }
 }
