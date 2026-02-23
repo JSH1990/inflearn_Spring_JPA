@@ -1,16 +1,14 @@
 package com.studyolle.modules.account;
 
+import com.studyolle.infra.AbstractContainerBaseTest;
+import com.studyolle.infra.MockMvcTest;
 import com.studyolle.infra.mail.EmailMessage;
 import com.studyolle.infra.mail.EmailService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,18 +22,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@Transactional
-@SpringBootTest
-@AutoConfigureMockMvc
-class AccountControllerTest {
+@MockMvcTest
+class AccountControllerTest extends AbstractContainerBaseTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired MockMvc mockMvc;
+    @Autowired AccountRepository accountRepository;
 
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @MockitoBean
+    @MockBean
     EmailService emailService;
 
     @DisplayName("인증 메일 확인 - 입력값 오류")
