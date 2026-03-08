@@ -8,6 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -28,7 +29,7 @@ class AccountControllerTest extends AbstractContainerBaseTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
 
-    @MockBean
+    @MockitoBean
     EmailService emailService;
 
     @DisplayName("인증 메일 확인 - 입력값 오류")
